@@ -22,6 +22,18 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+
+function ctrl_c() {
+	echo "ctrl+c pressed!"
+	sudo umount ./tmp/tmp_mnt
+	sudo umount ./tmp/tmp_extfs
+	sudo umount ./tmp_mnt
+	sudo umount ./tmp_extfs
+	echo "Unmounted and exited"
+	exit -1
+}
 
 if (( $EUID != 0 )); then
 	echo -e "${RED}Please run as root${NC}"

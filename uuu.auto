@@ -1,0 +1,13 @@
+uuu_version 1.4.127
+
+CFG: -vid 0x15A2 -pid 0x0080
+SDP: boot -f u-boot-emmc.imx
+FB: ucmd setenv fastboot_buffer 0x80800000
+FB: download -f zImage
+FB: ucmd setenv fastboot_buffer 0x83000000
+FB: download -f mys-6ull-14x14-emmc.dtb
+FB: ucmd setenv bootargs 'console=ttymxc0,115200n8 root=/dev/ram0 rw rootfstype=ext4'
+FB: ucmd setenv fastboot_buffer 0x86800000
+FB: download -f ramdisk_flash_tool.ext4.gz.u-boot
+FB: acmd bootz 0x80800000 0x86800000 0x83000000
+FBK: done

@@ -11,6 +11,7 @@ DTB=./mys-6ull-14x14-emmc.dtb
 KERNEL_BKP=./zImage_bkp
 DTB_BKP=./mys-6ull-14x14-emmc-bkp.dtb
 DISK=mmcblk1
+CRC_FILE=/sbin/crc_calc_verify.py
 
 
 if (( $EUID != 0 )); then
@@ -18,6 +19,10 @@ if (( $EUID != 0 )); then
 	exit
 fi
 
+if [ ! -f "$CRC_FILE" ]; then
+	echo -e "${RED}$CRC_FILE is not found in current dir!.${NC}"
+	exit -1
+fi
 
 # Check Primary Partition Healthy along with its primary & backup images
 # Check Secondary Partition Healthy along with its primary & backup images
@@ -190,22 +195,22 @@ mount /dev/${DISK}p2 /run/media/${DISK}p2
 
 # Check boot files CRC (zImage & dtb) on partition1
 mkdir -p /tmp/boot_verify
-python3 crc_calc_verify.py -i /run/media/${DISK}p1/$KERNEL -d /run/media/${DISK}p1/$DTB -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
+python3 ${CRC_FILE} -i /run/media/${DISK}p1/$KERNEL -d /run/media/${DISK}p1/$DTB -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
 disk_check $? "Serious Issue: CRC Verify is failed for PART1!" 9
 sleep 1 # give time to remount under /run/media/*
 rm /tmp/boot_verify/i_v.bin /tmp/boot_verify/d_v.bin
-python3 crc_calc_verify.py -i /run/media/${DISK}p1/$KERNEL -d /run/media/${DISK}p1/$DTB -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
+python3 ${CRC_FILE} -i /run/media/${DISK}p1/$KERNEL -d /run/media/${DISK}p1/$DTB -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
 diff /tmp/boot_verify/i_v.bin /run/media/${DISK}p1/i.bin
 disk_check $? "Serious Issue: CRC mismatch for Kernel/i.bin for PART1!" 9
 diff /tmp/boot_verify/d_v.bin /run/media/${DISK}p1/d.bin
 disk_check $? "Serious Issue: CRC mismatch for DTB/d.bin for PART1!" 9
 
 # Check backup boot files CRC (zImage & dtb) on partition1
-python3 crc_calc_verify.py -i /run/media/${DISK}p1/$KERNEL_BKP -d /run/media/${DISK}p1/$DTB_BKP -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
+python3 ${CRC_FILE} -i /run/media/${DISK}p1/$KERNEL_BKP -d /run/media/${DISK}p1/$DTB_BKP -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
 disk_check $? "Serious Issue: CRC Verify is failed for backup image in PART1!" 9
 sleep 1 # give time to remount under /run/media/*
 rm /tmp/boot_verify/i_v.bin /tmp/boot_verify/d_v.bin
-python3 crc_calc_verify.py -i /run/media/${DISK}p1/$KERNEL_BKP -d /run/media/${DISK}p1/$DTB_BKP -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
+python3 ${CRC_FILE} -i /run/media/${DISK}p1/$KERNEL_BKP -d /run/media/${DISK}p1/$DTB_BKP -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
 diff /tmp/boot_verify/i_v.bin /run/media/${DISK}p1/i.bin
 disk_check $? "Serious Issue: CRC mismatch for Kernel/i.bin for backup image in PART1!" 9
 diff /tmp/boot_verify/d_v.bin /run/media/${DISK}p1/d.bin
@@ -215,11 +220,11 @@ disk_check $? "Serious Issue: CRC mismatch for DTB/d.bin for backup image in PAR
 
 # Check boot files CRC (zImage & dtb) on partition2
 mkdir -p /tmp/boot_verify
-python3 crc_calc_verify.py -i /run/media/${DISK}p2/$KERNEL -d /run/media/${DISK}p2/$DTB -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
+python3 ${CRC_FILE} -i /run/media/${DISK}p2/$KERNEL -d /run/media/${DISK}p2/$DTB -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
 disk_check $? "Serious Issue: CRC Verify is failed! for PART2" 99
 sleep 1 # give time to remount under /run/media/*
 rm /tmp/boot_verify/i_v.bin /tmp/boot_verify/d_v.bin
-python3 crc_calc_verify.py -i /run/media/${DISK}p2/$KERNEL -d /run/media/${DISK}p2/$DTB -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
+python3 ${CRC_FILE} -i /run/media/${DISK}p2/$KERNEL -d /run/media/${DISK}p2/$DTB -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
 diff /tmp/boot_verify/i_v.bin /run/media/${DISK}p2/i.bin
 disk_check $? "Serious Issue: CRC mismatch for Kernel/i.bin for PART2!" 99
 diff /tmp/boot_verify/d_v.bin /run/media/${DISK}p2/d.bin
@@ -227,11 +232,11 @@ disk_check $? "Serious Issue: CRC mismatch for DTB/d.bin for PART2!" 99
 
 # Check backup boot files CRC (zImage & dtb) on partition2
 mkdir -p /tmp/boot_verify
-python3 crc_calc_verify.py -i /run/media/${DISK}p2/$KERNEL_BKP -d /run/media/${DISK}p2/$DTB_BKP -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
+python3 ${CRC_FILE} -i /run/media/${DISK}p2/$KERNEL_BKP -d /run/media/${DISK}p2/$DTB_BKP -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
 disk_check $? "Serious Issue: CRC Verify is failed! for backup image in PART2" 99
 sleep 1 # give time to remount under /run/media/*
 rm /tmp/boot_verify/i_v.bin /tmp/boot_verify/d_v.bin
-python3 crc_calc_verify.py -i /run/media/${DISK}p2/$KERNEL_BKP -d /run/media/${DISK}p2/$DTB_BKP -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
+python3 ${CRC_FILE} -i /run/media/${DISK}p2/$KERNEL_BKP -d /run/media/${DISK}p2/$DTB_BKP -io /tmp/boot_verify/i_v.bin -do /tmp/boot_verify/d_v.bin
 diff /tmp/boot_verify/i_v.bin /run/media/${DISK}p2/i.bin
 disk_check $? "Serious Issue: CRC mismatch for Kernel/i.bin for backup image in PART2!" 99
 diff /tmp/boot_verify/d_v.bin /run/media/${DISK}p2/d.bin
